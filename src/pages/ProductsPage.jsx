@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getProducts, getCategories } from "../features/products/services/productService";
+import { filterProducts, getCategories } from "../features/products/services/productService";
 import ProductCard from "../features/products/components/ProductCard";
 
 export default function ProductsPage() {
@@ -13,37 +13,47 @@ export default function ProductsPage() {
     const [sortBy, setSortBy] = useState("title");
     const [sortOrder, setSortOrder] = useState("asc");
     const [currentPage, setCurrentPage] = useState(1);
-    const productsPerPage = 8;
 
+    const productsPerPage = 8;
+    // --------
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
     useEffect(() => {
         async function load() {
             setLoading(true);
             // Currently just loads all products — students should use filterProducts()
-            const allProducts = await getProducts();
-            setProducts(allProducts);
+            const filtered = await filterProducts({
+                search,
+                category: selectedCategory, 
+                sortBy,
+                sortOrder,
+                page: currentPage,  
+                limit: productsPerPage,
+            });
+            setProducts(filtered.data);
+            setTotalPages(filtered.totalPages);
+            setTotalProducts(filtered.total);
             const cats = await getCategories();
             setCategories(cats);
             // Simulate a short loading time so the spinner is visible
             setTimeout(() => setLoading(false), 600);
         }
         load();
-    }, []);
+    }, [search, selectedCategory, sortBy, sortOrder, currentPage]);
 
+  
+    useEffect(() => {
+    setCurrentPage(1);
+}, [search, selectedCategory, sortBy, sortOrder]);
     // Basic client-side pagination (not using filterProducts — student task)
-    const startIndex = (currentPage - 1) * productsPerPage;
-    const paginatedProducts = products.slice(
-        startIndex,
-        startIndex + productsPerPage
-    );
-    const totalPages = Math.ceil(products.length / productsPerPage);
-
+  
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">All Products</h1>
                 <p className="text-gray-500">
-                    Browse our collection of {products.length} premium products
+                    Browse our collection of {totalProducts} premium products
                 </p>
             </div>
 
@@ -117,13 +127,13 @@ export default function ProductsPage() {
                 <>
                     {/* Product Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                        {paginatedProducts.map((product) => (
+                        {products.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
 
                     {/* Empty State */}
-                    {paginatedProducts.length === 0 && (
+                    {products.length === 0 && (
                         <div className="text-center py-16">
                             <svg
                                 className="w-16 h-16 text-gray-300 mx-auto mb-4"

@@ -107,7 +107,7 @@ export default function Footer() {
                             rel="noopener noreferrer"
                             className="text-white font-medium hover:text-primary-400 transition-colors underline decoration-gray-700 underline-offset-4"
                         >
-                            [Your Name]
+                            Aya Hassan
                         </a>
                     </p>
                     &copy; {new Date().getFullYear()} ShopHub. All rights reserved.
