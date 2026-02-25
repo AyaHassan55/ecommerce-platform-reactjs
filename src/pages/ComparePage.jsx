@@ -25,6 +25,24 @@ export default function ComparePage() {
         { label: "Stock", key: "stock", format: (v) => (v != null ? `${v} units` : "—") },
     ];
 
+    // function to compare values => to can color higher rating green and lower red
+    const getComparisonClass = (fieldKey, valA, valB, currentVal) => {
+        if (valA == null || valB == null) return "text-gray-500";
+        if (valA === valB) return "text-gray-500";
+
+        switch (fieldKey) {
+            case 'price':
+                const minPrice = Math.min(valA, valB);
+                return currentVal === minPrice ? "text-green-600 font-semibold" : "text-red-600";
+            case 'rating':
+            case 'stock':
+                const maxVal = Math.max(valA, valB);
+                return currentVal === maxVal ? "text-green-600 font-semibold" : "text-red-600";
+            default:
+                return "text-gray-800";
+        }
+    };
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
@@ -128,10 +146,32 @@ export default function ComparePage() {
                                 {field.label}
                             </div>
                             <div className="p-4 text-center text-sm text-gray-800 border-l border-gray-100">
-                                {productA ? field.format(productA[field.key]) : "—"}
+                                {productA ? (
+                                    <span
+                                        className={getComparisonClass(
+                                            field.key,
+                                            productA[field.key],
+                                            productB?.[field.key],
+                                            productA[field.key]
+                                        )}
+                                    >
+                                        {field.format(productA[field.key])}
+                                    </span>
+                                ) : "—"}
                             </div>
                             <div className="p-4 text-center text-sm text-gray-800 border-l border-gray-100">
-                                {productB ? field.format(productB[field.key]) : "—"}
+                                {productB ? (
+                                    <span
+                                        className={getComparisonClass(
+                                            field.key,
+                                            productA?.[field.key],
+                                            productB[field.key],
+                                            productB[field.key]
+                                        )}
+                                    >
+                                        {field.format(productB[field.key])}
+                                    </span>
+                                ) : "—"}
                             </div>
                         </div>
                     ))}
